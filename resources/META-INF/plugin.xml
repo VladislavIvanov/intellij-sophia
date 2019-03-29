@@ -1,0 +1,39 @@
+<idea-plugin>
+    <id>org.limechain</id>
+    <name>Sophia</name>
+    <version>1.0</version>
+    <vendor email="vlad@limechain.tech" url="http://www.limechain.tech">LimeChain</vendor>
+
+    <description><![CDATA[
+      AEternity Sophia language extension
+      AEternity Sophia language extension
+      AEternity Sophia language extension
+    ]]></description>
+
+    <change-notes><![CDATA[
+      Initial release.<br> Initial release.
+      Initial release.<br> Initial release.
+      Initial release.<br> Initial release.
+    ]]>
+    </change-notes>
+
+    <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
+    <idea-version since-build="145.0"/>
+
+    <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
+         on how to target different products -->
+    <!-- uncomment to enable plugin in all products
+    <depends>com.intellij.modules.lang</depends>
+    -->
+
+    <extensions defaultExtensionNs="com.intellij">
+        <fileTypeFactory implementation="org.limechain.SophiaFileTypeFactory"/>
+        <lang.parserDefinition language="Sophia" implementationClass="org.limechain.SophiaParserDefinition"/>
+        <lang.syntaxHighlighterFactory language="Sophia" implementationClass="org.limechain.SophiaSyntaxHighlighterFactory"/>
+    </extensions>
+
+    <actions>
+        <!-- Add your actions here -->
+    </actions>
+
+</idea-plugin>
