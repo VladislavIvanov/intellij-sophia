@@ -31,6 +31,8 @@
         <lang.parserDefinition language="Sophia" implementationClass="org.limechain.SophiaParserDefinition"/>
         <lang.syntaxHighlighterFactory language="Sophia" implementationClass="org.limechain.SophiaSyntaxHighlighterFactory"/>
         <colorSettingsPage implementation="org.limechain.SophiaColorSettingsPage"/>
+        <codeStyleSettingsProvider implementation="org.limechain.SophiaCodeStyleSettingsProvider"/>
+        <langCodeStyleSettingsProvider implementation="org.limechain.SophiaLanguageCodeStyleSettingsProvider"/>
     </extensions>
 
     <actions>
