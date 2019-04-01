@@ -30,6 +30,7 @@
         <fileTypeFactory implementation="org.limechain.SophiaFileTypeFactory"/>
         <lang.parserDefinition language="Sophia" implementationClass="org.limechain.SophiaParserDefinition"/>
         <lang.syntaxHighlighterFactory language="Sophia" implementationClass="org.limechain.SophiaSyntaxHighlighterFactory"/>
+        <colorSettingsPage implementation="org.limechain.SophiaColorSettingsPage"/>
     </extensions>
 
     <actions>
