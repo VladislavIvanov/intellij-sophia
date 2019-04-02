@@ -10,7 +10,16 @@ public interface SophiaInitFunctionDefinition extends PsiElement {
   @NotNull
   List<SophiaExpression> getExpressionList();
 
+  @Nullable
+  SophiaFunctionModifier getFunctionModifier();
+
+  @Nullable
+  SophiaObjectVariableDeclaration getObjectVariableDeclaration();
+
   @NotNull
   SophiaParameterList getParameterList();
+
+  @Nullable
+  SophiaVariableDeclaration getVariableDeclaration();
 
 }

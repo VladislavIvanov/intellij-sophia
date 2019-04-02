@@ -50,10 +50,4 @@ public class SophiaFunctionDefinitionImpl extends ASTWrapperPsiElement implement
     return findChildByClass(SophiaSophiaType.class);
   }
 
-  @Override
-  @Nullable
-  public PsiElement getIdentifier() {
-    return findChildByType(IDENTIFIER);
-  }
-
 }

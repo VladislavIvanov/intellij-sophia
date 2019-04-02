@@ -8,17 +8,16 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.limechain.psi.SophiaTypes.*;
-import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import org.limechain.psi.*;
 
-public class SophiaSophiaTypeImpl extends ASTWrapperPsiElement implements SophiaSophiaType {
+public class SophiaPropertyAccessExpressionImpl extends SophiaExpressionImpl implements SophiaPropertyAccessExpression {
 
-  public SophiaSophiaTypeImpl(@NotNull ASTNode node) {
+  public SophiaPropertyAccessExpressionImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull SophiaVisitor visitor) {
-    visitor.visitSophiaType(this);
+    visitor.visitPropertyAccessExpression(this);
   }
 
   public void accept(@NotNull PsiElementVisitor visitor) {
@@ -28,14 +27,8 @@ public class SophiaSophiaTypeImpl extends ASTWrapperPsiElement implements Sophia
 
   @Override
   @NotNull
-  public List<SophiaSophiaType> getSophiaTypeList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, SophiaSophiaType.class);
-  }
-
-  @Override
-  @Nullable
-  public PsiElement getIdentifier() {
-    return findChildByType(IDENTIFIER);
+  public SophiaExpression getExpression() {
+    return findNotNullChildByClass(SophiaExpression.class);
   }
 
 }

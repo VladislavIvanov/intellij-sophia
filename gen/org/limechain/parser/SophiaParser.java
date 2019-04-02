@@ -56,6 +56,9 @@ public class SophiaParser implements PsiParser, LightPsiParser {
     else if (t == EMIT_STATEMENT) {
       r = EmitStatement(b, 0);
     }
+    else if (t == EMPTY_ARRAY) {
+      r = EmptyArray(b, 0);
+    }
     else if (t == EMPTY_OBJECT) {
       r = EmptyObject(b, 0);
     }
@@ -70,6 +73,9 @@ public class SophiaParser implements PsiParser, LightPsiParser {
     }
     else if (t == EXPRESSION) {
       r = Expression(b, 0, -1);
+    }
+    else if (t == EXPRESSION_IN_OBJECT) {
+      r = ExpressionInObject(b, 0);
     }
     else if (t == FOR_STATEMENT) {
       r = ForStatement(b, 0);
@@ -113,6 +119,9 @@ public class SophiaParser implements PsiParser, LightPsiParser {
     else if (t == OBJECT_EXPRESSION) {
       r = ObjectExpression(b, 0);
     }
+    else if (t == OBJECT_VARIABLE_DECLARATION) {
+      r = ObjectVariableDeclaration(b, 0);
+    }
     else if (t == PARAMETER_DEF) {
       r = ParameterDef(b, 0);
     }
@@ -121,6 +130,9 @@ public class SophiaParser implements PsiParser, LightPsiParser {
     }
     else if (t == PLACEHOLDER_STATEMENT) {
       r = PlaceholderStatement(b, 0);
+    }
+    else if (t == PROPERTY_ACCESS_EXPRESSION) {
+      r = PropertyAccessExpression(b, 0);
     }
     else if (t == RECORD_DEFINITION) {
       r = RecordDefinition(b, 0);
@@ -191,9 +203,9 @@ public class SophiaParser implements PsiParser, LightPsiParser {
       EXPONENT_EXPRESSION, EXPRESSION, FUNCTION_CALL_EXPRESSION, INCREMENT_EXPRESSION,
       INDEX_ACCESS_EXPRESSION, INLINE_ARRAY_EXPRESSION, MEMBER_ACCESS_EXPRESSION, MULT_DIV_EXPRESSION,
       NEW_EXPRESSION, OBJECT_EXPRESSION, OR_EXPRESSION, OR_OP_EXPRESSION,
-      PAREN_EXPRESSION, PLUS_MIN_EXPRESSION, PRIMARY_EXPRESSION, SEQ_EXPRESSION,
-      SHIFT_EXPRESSION, STATE_UPDATE_EXPRESSION, TERNARY_EXPRESSION, TYPED_ASSIGNMENT_EXPRESSION,
-      UNARY_EXPRESSION, XOR_OP_EXPRESSION),
+      PAREN_EXPRESSION, PLUS_MIN_EXPRESSION, PRIMARY_EXPRESSION, PROPERTY_ACCESS_EXPRESSION,
+      SEQ_EXPRESSION, SHIFT_EXPRESSION, STATE_UPDATE_EXPRESSION, TERNARY_EXPRESSION,
+      TYPED_ASSIGNMENT_EXPRESSION, UNARY_EXPRESSION, XOR_OP_EXPRESSION),
   };
 
   /* ********************************************************** */
@@ -420,6 +432,18 @@ public class SophiaParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
+  // '['']'
+  public static boolean EmptyArray(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "EmptyArray")) return false;
+    if (!nextTokenIs(b, LBRACKET)) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeTokens(b, 0, LBRACKET, RBRACKET);
+    exit_section_(b, m, EMPTY_ARRAY, r);
+    return r;
+  }
+
+  /* ********************************************************** */
   // '{''}'
   public static boolean EmptyObject(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "EmptyObject")) return false;
@@ -505,6 +529,83 @@ public class SophiaParser implements PsiParser, LightPsiParser {
     if (!recursion_guard_(b, l, "EventDefinition_2")) return false;
     consumeToken(b, ANONYMOUS);
     return true;
+  }
+
+  /* ********************************************************** */
+  // '{' (Identifier | Expression) '=' (Expression | Identifier ) (',' (Identifier | Expression ) '=' ( Expression | Identifier ))* '}'
+  public static boolean ExpressionInObject(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "ExpressionInObject")) return false;
+    if (!nextTokenIs(b, LBRACE)) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, LBRACE);
+    r = r && ExpressionInObject_1(b, l + 1);
+    r = r && consumeToken(b, ASSIGN);
+    r = r && ExpressionInObject_3(b, l + 1);
+    r = r && ExpressionInObject_4(b, l + 1);
+    r = r && consumeToken(b, RBRACE);
+    exit_section_(b, m, EXPRESSION_IN_OBJECT, r);
+    return r;
+  }
+
+  // Identifier | Expression
+  private static boolean ExpressionInObject_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "ExpressionInObject_1")) return false;
+    boolean r;
+    r = consumeToken(b, IDENTIFIER);
+    if (!r) r = Expression(b, l + 1, -1);
+    return r;
+  }
+
+  // Expression | Identifier
+  private static boolean ExpressionInObject_3(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "ExpressionInObject_3")) return false;
+    boolean r;
+    r = Expression(b, l + 1, -1);
+    if (!r) r = consumeToken(b, IDENTIFIER);
+    return r;
+  }
+
+  // (',' (Identifier | Expression ) '=' ( Expression | Identifier ))*
+  private static boolean ExpressionInObject_4(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "ExpressionInObject_4")) return false;
+    while (true) {
+      int c = current_position_(b);
+      if (!ExpressionInObject_4_0(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "ExpressionInObject_4", c)) break;
+    }
+    return true;
+  }
+
+  // ',' (Identifier | Expression ) '=' ( Expression | Identifier )
+  private static boolean ExpressionInObject_4_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "ExpressionInObject_4_0")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, COMMA);
+    r = r && ExpressionInObject_4_0_1(b, l + 1);
+    r = r && consumeToken(b, ASSIGN);
+    r = r && ExpressionInObject_4_0_3(b, l + 1);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // Identifier | Expression
+  private static boolean ExpressionInObject_4_0_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "ExpressionInObject_4_0_1")) return false;
+    boolean r;
+    r = consumeToken(b, IDENTIFIER);
+    if (!r) r = Expression(b, l + 1, -1);
+    return r;
+  }
+
+  // Expression | Identifier
+  private static boolean ExpressionInObject_4_0_3(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "ExpressionInObject_4_0_3")) return false;
+    boolean r;
+    r = Expression(b, l + 1, -1);
+    if (!r) r = consumeToken(b, IDENTIFIER);
+    return r;
   }
 
   /* ********************************************************** */
@@ -659,7 +760,7 @@ public class SophiaParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // ( FunctionModifier )* function Identifier? ParameterList
-  //                      ( ':' SophiaType )? '=' '{'? Block '}'?
+  //                      ( ':' (SophiaType | Identifier) )? '=' '{'? Block '}'?
   public static boolean FunctionDefinition(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "FunctionDefinition")) return false;
     boolean r;
@@ -705,21 +806,30 @@ public class SophiaParser implements PsiParser, LightPsiParser {
     return true;
   }
 
-  // ( ':' SophiaType )?
+  // ( ':' (SophiaType | Identifier) )?
   private static boolean FunctionDefinition_4(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "FunctionDefinition_4")) return false;
     FunctionDefinition_4_0(b, l + 1);
     return true;
   }
 
-  // ':' SophiaType
+  // ':' (SophiaType | Identifier)
   private static boolean FunctionDefinition_4_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "FunctionDefinition_4_0")) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = consumeToken(b, COLON);
-    r = r && SophiaType(b, l + 1);
+    r = r && FunctionDefinition_4_0_1(b, l + 1);
     exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // SophiaType | Identifier
+  private static boolean FunctionDefinition_4_0_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "FunctionDefinition_4_0_1")) return false;
+    boolean r;
+    r = SophiaType(b, l + 1);
+    if (!r) r = consumeToken(b, IDENTIFIER);
     return r;
   }
 
@@ -1037,32 +1147,42 @@ public class SophiaParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // VisibilityModifiers function init ParameterList ( ':' state )? '=' '{' (AssignmentExpression ',' | AssignmentExpression)* '}'
+  // VisibilityModifiers FunctionModifier? function init ParameterList ( ':' state )? '=' (ObjectVariableDeclaration | VariableDeclaration)? '{' (AssignmentExpression ',' | AssignmentExpression)* '}'
   public static boolean InitFunctionDefinition(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "InitFunctionDefinition")) return false;
     boolean r;
     Marker m = enter_section_(b, l, _NONE_, INIT_FUNCTION_DEFINITION, "<init function definition>");
     r = VisibilityModifiers(b, l + 1);
+    r = r && InitFunctionDefinition_1(b, l + 1);
     r = r && consumeTokens(b, 0, FUNCTION, INIT);
     r = r && ParameterList(b, l + 1);
-    r = r && InitFunctionDefinition_4(b, l + 1);
-    r = r && consumeTokens(b, 0, ASSIGN, LBRACE);
+    r = r && InitFunctionDefinition_5(b, l + 1);
+    r = r && consumeToken(b, ASSIGN);
     r = r && InitFunctionDefinition_7(b, l + 1);
+    r = r && consumeToken(b, LBRACE);
+    r = r && InitFunctionDefinition_9(b, l + 1);
     r = r && consumeToken(b, RBRACE);
     exit_section_(b, l, m, r, false, null);
     return r;
   }
 
+  // FunctionModifier?
+  private static boolean InitFunctionDefinition_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "InitFunctionDefinition_1")) return false;
+    FunctionModifier(b, l + 1);
+    return true;
+  }
+
   // ( ':' state )?
-  private static boolean InitFunctionDefinition_4(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "InitFunctionDefinition_4")) return false;
-    InitFunctionDefinition_4_0(b, l + 1);
+  private static boolean InitFunctionDefinition_5(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "InitFunctionDefinition_5")) return false;
+    InitFunctionDefinition_5_0(b, l + 1);
     return true;
   }
 
   // ':' state
-  private static boolean InitFunctionDefinition_4_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "InitFunctionDefinition_4_0")) return false;
+  private static boolean InitFunctionDefinition_5_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "InitFunctionDefinition_5_0")) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = consumeTokens(b, 0, COLON, STATE);
@@ -1070,31 +1190,47 @@ public class SophiaParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // (AssignmentExpression ',' | AssignmentExpression)*
+  // (ObjectVariableDeclaration | VariableDeclaration)?
   private static boolean InitFunctionDefinition_7(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "InitFunctionDefinition_7")) return false;
+    InitFunctionDefinition_7_0(b, l + 1);
+    return true;
+  }
+
+  // ObjectVariableDeclaration | VariableDeclaration
+  private static boolean InitFunctionDefinition_7_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "InitFunctionDefinition_7_0")) return false;
+    boolean r;
+    r = ObjectVariableDeclaration(b, l + 1);
+    if (!r) r = VariableDeclaration(b, l + 1);
+    return r;
+  }
+
+  // (AssignmentExpression ',' | AssignmentExpression)*
+  private static boolean InitFunctionDefinition_9(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "InitFunctionDefinition_9")) return false;
     while (true) {
       int c = current_position_(b);
-      if (!InitFunctionDefinition_7_0(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "InitFunctionDefinition_7", c)) break;
+      if (!InitFunctionDefinition_9_0(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "InitFunctionDefinition_9", c)) break;
     }
     return true;
   }
 
   // AssignmentExpression ',' | AssignmentExpression
-  private static boolean InitFunctionDefinition_7_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "InitFunctionDefinition_7_0")) return false;
+  private static boolean InitFunctionDefinition_9_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "InitFunctionDefinition_9_0")) return false;
     boolean r;
     Marker m = enter_section_(b);
-    r = InitFunctionDefinition_7_0_0(b, l + 1);
+    r = InitFunctionDefinition_9_0_0(b, l + 1);
     if (!r) r = Expression(b, l + 1, -1);
     exit_section_(b, m, null, r);
     return r;
   }
 
   // AssignmentExpression ','
-  private static boolean InitFunctionDefinition_7_0_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "InitFunctionDefinition_7_0_0")) return false;
+  private static boolean InitFunctionDefinition_9_0_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "InitFunctionDefinition_9_0_0")) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = Expression(b, l + 1, -1);
@@ -1116,7 +1252,7 @@ public class SophiaParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // map '(' (ElementaryTypeName | SophiaType) (',' (ElementaryTypeName | SophiaType))? ')'
+  // map '(' (ElementaryTypeName | SophiaType | Identifier) (',' (ElementaryTypeName | SophiaType | Identifier))? ')'
   public static boolean MapType(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "MapType")) return false;
     if (!nextTokenIs(b, MAP)) return false;
@@ -1130,23 +1266,24 @@ public class SophiaParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // ElementaryTypeName | SophiaType
+  // ElementaryTypeName | SophiaType | Identifier
   private static boolean MapType_2(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "MapType_2")) return false;
     boolean r;
     r = ElementaryTypeName(b, l + 1);
     if (!r) r = SophiaType(b, l + 1);
+    if (!r) r = consumeToken(b, IDENTIFIER);
     return r;
   }
 
-  // (',' (ElementaryTypeName | SophiaType))?
+  // (',' (ElementaryTypeName | SophiaType | Identifier))?
   private static boolean MapType_3(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "MapType_3")) return false;
     MapType_3_0(b, l + 1);
     return true;
   }
 
-  // ',' (ElementaryTypeName | SophiaType)
+  // ',' (ElementaryTypeName | SophiaType | Identifier)
   private static boolean MapType_3_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "MapType_3_0")) return false;
     boolean r;
@@ -1157,12 +1294,13 @@ public class SophiaParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // ElementaryTypeName | SophiaType
+  // ElementaryTypeName | SophiaType | Identifier
   private static boolean MapType_3_0_1(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "MapType_3_0_1")) return false;
     boolean r;
     r = ElementaryTypeName(b, l + 1);
     if (!r) r = SophiaType(b, l + 1);
+    if (!r) r = consumeToken(b, IDENTIFIER);
     return r;
   }
 
@@ -1231,15 +1369,71 @@ public class SophiaParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // Identifier (':' (TypeName | SophiaType | Identifier))?
-  public static boolean ParameterDef(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "ParameterDef")) return false;
-    if (!nextTokenIs(b, IDENTIFIER)) return false;
+  // let Identifier '=' '{' (AssignmentExpression ',' | AssignmentExpression)* '}'
+  public static boolean ObjectVariableDeclaration(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "ObjectVariableDeclaration")) return false;
+    if (!nextTokenIs(b, LET)) return false;
     boolean r;
     Marker m = enter_section_(b);
-    r = consumeToken(b, IDENTIFIER);
+    r = consumeTokens(b, 0, LET, IDENTIFIER, ASSIGN, LBRACE);
+    r = r && ObjectVariableDeclaration_4(b, l + 1);
+    r = r && consumeToken(b, RBRACE);
+    exit_section_(b, m, OBJECT_VARIABLE_DECLARATION, r);
+    return r;
+  }
+
+  // (AssignmentExpression ',' | AssignmentExpression)*
+  private static boolean ObjectVariableDeclaration_4(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "ObjectVariableDeclaration_4")) return false;
+    while (true) {
+      int c = current_position_(b);
+      if (!ObjectVariableDeclaration_4_0(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "ObjectVariableDeclaration_4", c)) break;
+    }
+    return true;
+  }
+
+  // AssignmentExpression ',' | AssignmentExpression
+  private static boolean ObjectVariableDeclaration_4_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "ObjectVariableDeclaration_4_0")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = ObjectVariableDeclaration_4_0_0(b, l + 1);
+    if (!r) r = Expression(b, l + 1, -1);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // AssignmentExpression ','
+  private static boolean ObjectVariableDeclaration_4_0_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "ObjectVariableDeclaration_4_0_0")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = Expression(b, l + 1, -1);
+    r = r && consumeToken(b, COMMA);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // ( SophiaType | TypeName | Identifier) (':' (TypeName | SophiaType | Identifier))?
+  public static boolean ParameterDef(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "ParameterDef")) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _NONE_, PARAMETER_DEF, "<parameter def>");
+    r = ParameterDef_0(b, l + 1);
     r = r && ParameterDef_1(b, l + 1);
-    exit_section_(b, m, PARAMETER_DEF, r);
+    exit_section_(b, l, m, r, false, null);
+    return r;
+  }
+
+  // SophiaType | TypeName | Identifier
+  private static boolean ParameterDef_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "ParameterDef_0")) return false;
+    boolean r;
+    r = SophiaType(b, l + 1);
+    if (!r) r = TypeName(b, l + 1, -1);
+    if (!r) r = consumeToken(b, IDENTIFIER);
     return r;
   }
 
@@ -1348,8 +1542,22 @@ public class SophiaParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
+  // '{' Expression '}'
+  public static boolean PropertyAccessExpression(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "PropertyAccessExpression")) return false;
+    if (!nextTokenIs(b, LBRACE)) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, LBRACE);
+    r = r && Expression(b, l + 1, -1);
+    r = r && consumeToken(b, RBRACE);
+    exit_section_(b, m, PROPERTY_ACCESS_EXPRESSION, r);
+    return r;
+  }
+
+  /* ********************************************************** */
   // record (Identifier | state) '=' '{'
-  //                      ( Identifier ':' (ElementaryTypeName | SophiaType)) ( ',' Identifier ':' (ElementaryTypeName | SophiaType))* '}'
+  //                      ( Identifier ':' (ElementaryTypeName | SophiaType | Identifier )) ( ',' Identifier ':' (ElementaryTypeName | SophiaType | Identifier))* '}'
   public static boolean RecordDefinition(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "RecordDefinition")) return false;
     if (!nextTokenIs(b, RECORD)) return false;
@@ -1374,7 +1582,7 @@ public class SophiaParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // Identifier ':' (ElementaryTypeName | SophiaType)
+  // Identifier ':' (ElementaryTypeName | SophiaType | Identifier )
   private static boolean RecordDefinition_4(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "RecordDefinition_4")) return false;
     boolean r;
@@ -1385,16 +1593,17 @@ public class SophiaParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // ElementaryTypeName | SophiaType
+  // ElementaryTypeName | SophiaType | Identifier
   private static boolean RecordDefinition_4_2(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "RecordDefinition_4_2")) return false;
     boolean r;
     r = ElementaryTypeName(b, l + 1);
     if (!r) r = SophiaType(b, l + 1);
+    if (!r) r = consumeToken(b, IDENTIFIER);
     return r;
   }
 
-  // ( ',' Identifier ':' (ElementaryTypeName | SophiaType))*
+  // ( ',' Identifier ':' (ElementaryTypeName | SophiaType | Identifier))*
   private static boolean RecordDefinition_5(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "RecordDefinition_5")) return false;
     while (true) {
@@ -1405,7 +1614,7 @@ public class SophiaParser implements PsiParser, LightPsiParser {
     return true;
   }
 
-  // ',' Identifier ':' (ElementaryTypeName | SophiaType)
+  // ',' Identifier ':' (ElementaryTypeName | SophiaType | Identifier)
   private static boolean RecordDefinition_5_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "RecordDefinition_5_0")) return false;
     boolean r;
@@ -1416,12 +1625,13 @@ public class SophiaParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // ElementaryTypeName | SophiaType
+  // ElementaryTypeName | SophiaType | Identifier
   private static boolean RecordDefinition_5_0_3(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "RecordDefinition_5_0_3")) return false;
     boolean r;
     r = ElementaryTypeName(b, l + 1);
     if (!r) r = SophiaType(b, l + 1);
+    if (!r) r = consumeToken(b, IDENTIFIER);
     return r;
   }
 
@@ -1508,7 +1718,7 @@ public class SophiaParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // int | address | bool | bits | string | list | tuple | record | map | state | transactions | events | signature
+  // int | address | bool | bits | string | list'(' Identifier ')' | list  | tuple | record | map | state | transactions | events | signature | oracle '(' (SophiaType | Identifier) (',' (SophiaType | Identifier) )* ')' | oracle |  oracle_query '(' (SophiaType | Identifier) (',' (SophiaType | Identifier) )* ')' | '(' SophiaType (',' SophiaType)* ')'
   public static boolean SophiaType(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "SophiaType")) return false;
     boolean r;
@@ -1518,6 +1728,7 @@ public class SophiaParser implements PsiParser, LightPsiParser {
     if (!r) r = consumeToken(b, BOOL);
     if (!r) r = consumeToken(b, BITS);
     if (!r) r = consumeToken(b, STRING);
+    if (!r) r = parseTokens(b, 0, LIST, LPAREN, IDENTIFIER, RPAREN);
     if (!r) r = consumeToken(b, LIST);
     if (!r) r = consumeToken(b, TUPLE);
     if (!r) r = consumeToken(b, RECORD);
@@ -1526,7 +1737,152 @@ public class SophiaParser implements PsiParser, LightPsiParser {
     if (!r) r = consumeToken(b, TRANSACTIONS);
     if (!r) r = consumeToken(b, EVENTS);
     if (!r) r = consumeToken(b, SIGNATURE);
+    if (!r) r = SophiaType_14(b, l + 1);
+    if (!r) r = consumeToken(b, ORACLE);
+    if (!r) r = SophiaType_16(b, l + 1);
+    if (!r) r = SophiaType_17(b, l + 1);
     exit_section_(b, l, m, r, false, null);
+    return r;
+  }
+
+  // oracle '(' (SophiaType | Identifier) (',' (SophiaType | Identifier) )* ')'
+  private static boolean SophiaType_14(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "SophiaType_14")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeTokens(b, 0, ORACLE, LPAREN);
+    r = r && SophiaType_14_2(b, l + 1);
+    r = r && SophiaType_14_3(b, l + 1);
+    r = r && consumeToken(b, RPAREN);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // SophiaType | Identifier
+  private static boolean SophiaType_14_2(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "SophiaType_14_2")) return false;
+    boolean r;
+    r = SophiaType(b, l + 1);
+    if (!r) r = consumeToken(b, IDENTIFIER);
+    return r;
+  }
+
+  // (',' (SophiaType | Identifier) )*
+  private static boolean SophiaType_14_3(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "SophiaType_14_3")) return false;
+    while (true) {
+      int c = current_position_(b);
+      if (!SophiaType_14_3_0(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "SophiaType_14_3", c)) break;
+    }
+    return true;
+  }
+
+  // ',' (SophiaType | Identifier)
+  private static boolean SophiaType_14_3_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "SophiaType_14_3_0")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, COMMA);
+    r = r && SophiaType_14_3_0_1(b, l + 1);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // SophiaType | Identifier
+  private static boolean SophiaType_14_3_0_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "SophiaType_14_3_0_1")) return false;
+    boolean r;
+    r = SophiaType(b, l + 1);
+    if (!r) r = consumeToken(b, IDENTIFIER);
+    return r;
+  }
+
+  // oracle_query '(' (SophiaType | Identifier) (',' (SophiaType | Identifier) )* ')'
+  private static boolean SophiaType_16(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "SophiaType_16")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeTokens(b, 0, ORACLE_QUERY, LPAREN);
+    r = r && SophiaType_16_2(b, l + 1);
+    r = r && SophiaType_16_3(b, l + 1);
+    r = r && consumeToken(b, RPAREN);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // SophiaType | Identifier
+  private static boolean SophiaType_16_2(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "SophiaType_16_2")) return false;
+    boolean r;
+    r = SophiaType(b, l + 1);
+    if (!r) r = consumeToken(b, IDENTIFIER);
+    return r;
+  }
+
+  // (',' (SophiaType | Identifier) )*
+  private static boolean SophiaType_16_3(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "SophiaType_16_3")) return false;
+    while (true) {
+      int c = current_position_(b);
+      if (!SophiaType_16_3_0(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "SophiaType_16_3", c)) break;
+    }
+    return true;
+  }
+
+  // ',' (SophiaType | Identifier)
+  private static boolean SophiaType_16_3_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "SophiaType_16_3_0")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, COMMA);
+    r = r && SophiaType_16_3_0_1(b, l + 1);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // SophiaType | Identifier
+  private static boolean SophiaType_16_3_0_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "SophiaType_16_3_0_1")) return false;
+    boolean r;
+    r = SophiaType(b, l + 1);
+    if (!r) r = consumeToken(b, IDENTIFIER);
+    return r;
+  }
+
+  // '(' SophiaType (',' SophiaType)* ')'
+  private static boolean SophiaType_17(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "SophiaType_17")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, LPAREN);
+    r = r && SophiaType(b, l + 1);
+    r = r && SophiaType_17_2(b, l + 1);
+    r = r && consumeToken(b, RPAREN);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // (',' SophiaType)*
+  private static boolean SophiaType_17_2(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "SophiaType_17_2")) return false;
+    while (true) {
+      int c = current_position_(b);
+      if (!SophiaType_17_2_0(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "SophiaType_17_2", c)) break;
+    }
+    return true;
+  }
+
+  // ',' SophiaType
+  private static boolean SophiaType_17_2_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "SophiaType_17_2_0")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, COMMA);
+    r = r && SophiaType(b, l + 1);
+    exit_section_(b, m, null, r);
     return r;
   }
 
@@ -1960,7 +2316,8 @@ public class SophiaParser implements PsiParser, LightPsiParser {
   // let DeclarationList |
   //     DeclarationList |
   //     TypedDeclarationList |
-  //     TypeName Identifier
+  //     TypeName Identifier |
+  //     PropertyAccessExpression
   public static boolean VariableDeclaration(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "VariableDeclaration")) return false;
     boolean r;
@@ -1969,6 +2326,7 @@ public class SophiaParser implements PsiParser, LightPsiParser {
     if (!r) r = DeclarationList(b, l + 1);
     if (!r) r = TypedDeclarationList(b, l + 1);
     if (!r) r = VariableDeclaration_3(b, l + 1);
+    if (!r) r = PropertyAccessExpression(b, l + 1);
     exit_section_(b, l, m, r, false, null);
     return r;
   }
@@ -1996,7 +2354,7 @@ public class SophiaParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // VariableDeclaration ( '=' (Expression | Statement | hash) )?
+  // VariableDeclaration ( '=' (Expression | Statement | hash | ExpressionInObject) )?
   public static boolean VariableDefinition(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "VariableDefinition")) return false;
     boolean r;
@@ -2007,14 +2365,14 @@ public class SophiaParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // ( '=' (Expression | Statement | hash) )?
+  // ( '=' (Expression | Statement | hash | ExpressionInObject) )?
   private static boolean VariableDefinition_1(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "VariableDefinition_1")) return false;
     VariableDefinition_1_0(b, l + 1);
     return true;
   }
 
-  // '=' (Expression | Statement | hash)
+  // '=' (Expression | Statement | hash | ExpressionInObject)
   private static boolean VariableDefinition_1_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "VariableDefinition_1_0")) return false;
     boolean r;
@@ -2025,13 +2383,14 @@ public class SophiaParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // Expression | Statement | hash
+  // Expression | Statement | hash | ExpressionInObject
   private static boolean VariableDefinition_1_0_1(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "VariableDefinition_1_0_1")) return false;
     boolean r;
     r = Expression(b, l + 1, -1);
     if (!r) r = Statement(b, l + 1);
     if (!r) r = consumeToken(b, HASH);
+    if (!r) r = ExpressionInObject(b, l + 1);
     return r;
   }
 
@@ -2197,7 +2556,7 @@ public class SophiaParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // ('=' | '|=' | '^=' | '&=' | '<<=' | '>>=' | '+=' | '-=' | '*=' | '/=' | '%=') (Expression | SophiaType | EmptyObject)
+  // ('=' | '|=' | '^=' | '&=' | '<<=' | '>>=' | '+=' | '-=' | '*=' | '/=' | '%=' ) (EmptyArray | Expression | SophiaType | ExpressionInObject | EmptyObject)
   private static boolean AssignmentExpression_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "AssignmentExpression_0")) return false;
     boolean r;
@@ -2228,17 +2587,19 @@ public class SophiaParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // Expression | SophiaType | EmptyObject
+  // EmptyArray | Expression | SophiaType | ExpressionInObject | EmptyObject
   private static boolean AssignmentExpression_0_1(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "AssignmentExpression_0_1")) return false;
     boolean r;
-    r = Expression(b, l + 1, -1);
+    r = EmptyArray(b, l + 1);
+    if (!r) r = Expression(b, l + 1, -1);
     if (!r) r = SophiaType(b, l + 1);
+    if (!r) r = ExpressionInObject(b, l + 1);
     if (!r) r = EmptyObject(b, l + 1);
     return r;
   }
 
-  // ':' (ElementaryTypeName | SophiaType)+
+  // ':' (ElementaryTypeName | SophiaType | Identifier)+
   public static boolean TypedAssignmentExpression(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "TypedAssignmentExpression")) return false;
     if (!nextTokenIsSmart(b, COLON)) return false;
@@ -2250,7 +2611,7 @@ public class SophiaParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // (ElementaryTypeName | SophiaType)+
+  // (ElementaryTypeName | SophiaType | Identifier)+
   private static boolean TypedAssignmentExpression_1(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "TypedAssignmentExpression_1")) return false;
     boolean r;
@@ -2265,12 +2626,13 @@ public class SophiaParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // ElementaryTypeName | SophiaType
+  // ElementaryTypeName | SophiaType | Identifier
   private static boolean TypedAssignmentExpression_1_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "TypedAssignmentExpression_1_0")) return false;
     boolean r;
     r = ElementaryTypeName(b, l + 1);
     if (!r) r = SophiaType(b, l + 1);
+    if (!r) r = consumeTokenSmart(b, IDENTIFIER);
     return r;
   }
 
@@ -2285,7 +2647,7 @@ public class SophiaParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // (Identifier '(' FunctionCallArguments? ')') |
+  // Identifier (':' (Identifier | SophiaType))* (',' (Identifier (':' (Identifier | SophiaType))*)* ')'* '=>'* Statement* '(' FunctionCallArguments? ')') |
   //                            ( ( PrimaryExpression | NewExpression | TypeName  ) ( ( '.' Identifier ) | ( '[' Expression? ']' ) )* '(' FunctionCallArguments? ')' )
   public static boolean FunctionCallExpression(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "FunctionCallExpression")) return false;
@@ -2297,21 +2659,155 @@ public class SophiaParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // Identifier '(' FunctionCallArguments? ')'
+  // Identifier (':' (Identifier | SophiaType))* (',' (Identifier (':' (Identifier | SophiaType))*)* ')'* '=>'* Statement* '(' FunctionCallArguments? ')')
   private static boolean FunctionCallExpression_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "FunctionCallExpression_0")) return false;
     boolean r;
     Marker m = enter_section_(b);
-    r = consumeTokensSmart(b, 0, IDENTIFIER, LPAREN);
+    r = consumeTokenSmart(b, IDENTIFIER);
+    r = r && FunctionCallExpression_0_1(b, l + 1);
     r = r && FunctionCallExpression_0_2(b, l + 1);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // (':' (Identifier | SophiaType))*
+  private static boolean FunctionCallExpression_0_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "FunctionCallExpression_0_1")) return false;
+    while (true) {
+      int c = current_position_(b);
+      if (!FunctionCallExpression_0_1_0(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "FunctionCallExpression_0_1", c)) break;
+    }
+    return true;
+  }
+
+  // ':' (Identifier | SophiaType)
+  private static boolean FunctionCallExpression_0_1_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "FunctionCallExpression_0_1_0")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeTokenSmart(b, COLON);
+    r = r && FunctionCallExpression_0_1_0_1(b, l + 1);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // Identifier | SophiaType
+  private static boolean FunctionCallExpression_0_1_0_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "FunctionCallExpression_0_1_0_1")) return false;
+    boolean r;
+    r = consumeTokenSmart(b, IDENTIFIER);
+    if (!r) r = SophiaType(b, l + 1);
+    return r;
+  }
+
+  // ',' (Identifier (':' (Identifier | SophiaType))*)* ')'* '=>'* Statement* '(' FunctionCallArguments? ')'
+  private static boolean FunctionCallExpression_0_2(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "FunctionCallExpression_0_2")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeTokenSmart(b, COMMA);
+    r = r && FunctionCallExpression_0_2_1(b, l + 1);
+    r = r && FunctionCallExpression_0_2_2(b, l + 1);
+    r = r && FunctionCallExpression_0_2_3(b, l + 1);
+    r = r && FunctionCallExpression_0_2_4(b, l + 1);
+    r = r && consumeToken(b, LPAREN);
+    r = r && FunctionCallExpression_0_2_6(b, l + 1);
     r = r && consumeToken(b, RPAREN);
     exit_section_(b, m, null, r);
     return r;
   }
 
+  // (Identifier (':' (Identifier | SophiaType))*)*
+  private static boolean FunctionCallExpression_0_2_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "FunctionCallExpression_0_2_1")) return false;
+    while (true) {
+      int c = current_position_(b);
+      if (!FunctionCallExpression_0_2_1_0(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "FunctionCallExpression_0_2_1", c)) break;
+    }
+    return true;
+  }
+
+  // Identifier (':' (Identifier | SophiaType))*
+  private static boolean FunctionCallExpression_0_2_1_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "FunctionCallExpression_0_2_1_0")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeTokenSmart(b, IDENTIFIER);
+    r = r && FunctionCallExpression_0_2_1_0_1(b, l + 1);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // (':' (Identifier | SophiaType))*
+  private static boolean FunctionCallExpression_0_2_1_0_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "FunctionCallExpression_0_2_1_0_1")) return false;
+    while (true) {
+      int c = current_position_(b);
+      if (!FunctionCallExpression_0_2_1_0_1_0(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "FunctionCallExpression_0_2_1_0_1", c)) break;
+    }
+    return true;
+  }
+
+  // ':' (Identifier | SophiaType)
+  private static boolean FunctionCallExpression_0_2_1_0_1_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "FunctionCallExpression_0_2_1_0_1_0")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeTokenSmart(b, COLON);
+    r = r && FunctionCallExpression_0_2_1_0_1_0_1(b, l + 1);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // Identifier | SophiaType
+  private static boolean FunctionCallExpression_0_2_1_0_1_0_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "FunctionCallExpression_0_2_1_0_1_0_1")) return false;
+    boolean r;
+    r = consumeTokenSmart(b, IDENTIFIER);
+    if (!r) r = SophiaType(b, l + 1);
+    return r;
+  }
+
+  // ')'*
+  private static boolean FunctionCallExpression_0_2_2(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "FunctionCallExpression_0_2_2")) return false;
+    while (true) {
+      int c = current_position_(b);
+      if (!consumeTokenSmart(b, RPAREN)) break;
+      if (!empty_element_parsed_guard_(b, "FunctionCallExpression_0_2_2", c)) break;
+    }
+    return true;
+  }
+
+  // '=>'*
+  private static boolean FunctionCallExpression_0_2_3(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "FunctionCallExpression_0_2_3")) return false;
+    while (true) {
+      int c = current_position_(b);
+      if (!consumeTokenSmart(b, TO)) break;
+      if (!empty_element_parsed_guard_(b, "FunctionCallExpression_0_2_3", c)) break;
+    }
+    return true;
+  }
+
+  // Statement*
+  private static boolean FunctionCallExpression_0_2_4(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "FunctionCallExpression_0_2_4")) return false;
+    while (true) {
+      int c = current_position_(b);
+      if (!Statement(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "FunctionCallExpression_0_2_4", c)) break;
+    }
+    return true;
+  }
+
   // FunctionCallArguments?
-  private static boolean FunctionCallExpression_0_2(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "FunctionCallExpression_0_2")) return false;
+  private static boolean FunctionCallExpression_0_2_6(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "FunctionCallExpression_0_2_6")) return false;
     FunctionCallArguments(b, l + 1);
     return true;
   }
@@ -2538,7 +3034,7 @@ public class SophiaParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // '<' | '>' | '<=' | '>='
+  // '<' | '>' | '<=' | '>=' | '=<'
   private static boolean CompExpression_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "CompExpression_0")) return false;
     boolean r;
@@ -2547,6 +3043,7 @@ public class SophiaParser implements PsiParser, LightPsiParser {
     if (!r) r = consumeTokenSmart(b, MORE);
     if (!r) r = consumeTokenSmart(b, LESSEQ);
     if (!r) r = consumeTokenSmart(b, MOREEQ);
+    if (!r) r = consumeTokenSmart(b, "=<");
     exit_section_(b, m, null, r);
     return r;
   }
@@ -2642,18 +3139,25 @@ public class SophiaParser implements PsiParser, LightPsiParser {
     return true;
   }
 
-  // '[' Expression (',' Expression)* ']'
+  // '[' Expression? (',' Expression)* ']'
   public static boolean InlineArrayExpression(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "InlineArrayExpression")) return false;
     if (!nextTokenIsSmart(b, LBRACKET)) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = consumeTokenSmart(b, LBRACKET);
-    r = r && Expression(b, l + 1, -1);
+    r = r && InlineArrayExpression_1(b, l + 1);
     r = r && InlineArrayExpression_2(b, l + 1);
     r = r && consumeToken(b, RBRACKET);
     exit_section_(b, m, INLINE_ARRAY_EXPRESSION, r);
     return r;
+  }
+
+  // Expression?
+  private static boolean InlineArrayExpression_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "InlineArrayExpression_1")) return false;
+    Expression(b, l + 1, -1);
+    return true;
   }
 
   // (',' Expression)*

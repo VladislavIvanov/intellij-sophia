@@ -34,6 +34,12 @@ public class SophiaVariableDefinitionImpl extends ASTWrapperPsiElement implement
 
   @Override
   @Nullable
+  public SophiaExpressionInObject getExpressionInObject() {
+    return findChildByClass(SophiaExpressionInObject.class);
+  }
+
+  @Override
+  @Nullable
   public SophiaStatement getStatement() {
     return findChildByClass(SophiaStatement.class);
   }

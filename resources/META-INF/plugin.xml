@@ -1,19 +1,25 @@
 <idea-plugin>
     <id>org.limechain</id>
-    <name>Sophia</name>
+    <name>Sophia Æternity</name>
     <version>1.0</version>
     <vendor email="vlad@limechain.tech" url="http://www.limechain.tech">LimeChain</vendor>
 
     <description><![CDATA[
-      AEternity Sophia language extension
-      AEternity Sophia language extension
-      AEternity Sophia language extension
+        Æternity Sophia language extension. <br/>
+        You can support the plugin development by clicking star on <a href="https://github.com/VladislavIvanov/intellij-sophia">GitHub</a> and rating it on the plugin page.
+        Contributions are always welcome!
     ]]></description>
 
     <change-notes><![CDATA[
-      Initial release.<br> Initial release.
-      Initial release.<br> Initial release.
-      Initial release.<br> Initial release.
+        <p> Sophia Æ extension v1 </p>
+        <ul>
+            <li>Define a Sophia language</li>
+            <li>Define an Aeternity icon</li>
+            <li>Define an Æ Sophia file type - <b>aes</b> </li>
+            <li>Initial Sophia grammar and lexer</li>
+            <li>Sophia syntax highlighter</li>
+            <li>Sophia color settings page</li>
+        </ul>
     ]]>
     </change-notes>
 
@@ -22,9 +28,9 @@
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
          on how to target different products -->
-    <!-- uncomment to enable plugin in all products
+
+    <!-- Enable plugin for all products -->
     <depends>com.intellij.modules.lang</depends>
-    -->
 
     <extensions defaultExtensionNs="com.intellij">
         <fileTypeFactory implementation="org.limechain.SophiaFileTypeFactory"/>

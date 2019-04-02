@@ -34,6 +34,12 @@ public class SophiaVariableDeclarationImpl extends ASTWrapperPsiElement implemen
 
   @Override
   @Nullable
+  public SophiaPropertyAccessExpression getPropertyAccessExpression() {
+    return findChildByClass(SophiaPropertyAccessExpression.class);
+  }
+
+  @Override
+  @Nullable
   public SophiaTypeName getTypeName() {
     return findChildByClass(SophiaTypeName.class);
   }

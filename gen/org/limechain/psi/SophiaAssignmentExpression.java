@@ -8,10 +8,16 @@ import com.intellij.psi.PsiElement;
 public interface SophiaAssignmentExpression extends SophiaExpression {
 
   @Nullable
+  SophiaEmptyArray getEmptyArray();
+
+  @Nullable
   SophiaEmptyObject getEmptyObject();
 
   @NotNull
   List<SophiaExpression> getExpressionList();
+
+  @Nullable
+  SophiaExpressionInObject getExpressionInObject();
 
   @Nullable
   SophiaSophiaType getSophiaType();

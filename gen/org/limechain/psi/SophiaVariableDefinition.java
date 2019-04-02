@@ -11,6 +11,9 @@ public interface SophiaVariableDefinition extends PsiElement {
   SophiaExpression getExpression();
 
   @Nullable
+  SophiaExpressionInObject getExpressionInObject();
+
+  @Nullable
   SophiaStatement getStatement();
 
   @NotNull

@@ -5,12 +5,12 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface SophiaParameterDef extends PsiElement {
+public interface SophiaObjectVariableDeclaration extends PsiElement {
 
   @NotNull
-  List<SophiaSophiaType> getSophiaTypeList();
+  List<SophiaExpression> getExpressionList();
 
   @NotNull
-  List<SophiaTypeName> getTypeNameList();
+  PsiElement getIdentifier();
 
 }

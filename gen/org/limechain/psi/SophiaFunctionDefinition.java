@@ -19,7 +19,4 @@ public interface SophiaFunctionDefinition extends PsiElement {
   @Nullable
   SophiaSophiaType getSophiaType();
 
-  @Nullable
-  PsiElement getIdentifier();
-
 }

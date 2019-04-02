@@ -7,4 +7,10 @@ import com.intellij.psi.PsiElement;
 
 public interface SophiaSophiaType extends PsiElement {
 
+  @NotNull
+  List<SophiaSophiaType> getSophiaTypeList();
+
+  @Nullable
+  PsiElement getIdentifier();
+
 }

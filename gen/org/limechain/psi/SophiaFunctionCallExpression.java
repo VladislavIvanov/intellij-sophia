@@ -13,6 +13,12 @@ public interface SophiaFunctionCallExpression extends SophiaExpression {
   @Nullable
   SophiaFunctionCallArguments getFunctionCallArguments();
 
+  @NotNull
+  List<SophiaSophiaType> getSophiaTypeList();
+
+  @NotNull
+  List<SophiaStatement> getStatementList();
+
   @Nullable
   SophiaTypeName getTypeName();
 

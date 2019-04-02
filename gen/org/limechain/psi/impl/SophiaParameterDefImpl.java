@@ -27,15 +27,15 @@ public class SophiaParameterDefImpl extends ASTWrapperPsiElement implements Soph
   }
 
   @Override
-  @Nullable
-  public SophiaSophiaType getSophiaType() {
-    return findChildByClass(SophiaSophiaType.class);
+  @NotNull
+  public List<SophiaSophiaType> getSophiaTypeList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, SophiaSophiaType.class);
   }
 
   @Override
-  @Nullable
-  public SophiaTypeName getTypeName() {
-    return findChildByClass(SophiaTypeName.class);
+  @NotNull
+  public List<SophiaTypeName> getTypeNameList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, SophiaTypeName.class);
   }
 
 }

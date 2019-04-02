@@ -27,6 +27,12 @@ public class SophiaAssignmentExpressionImpl extends SophiaExpressionImpl impleme
 
   @Override
   @Nullable
+  public SophiaEmptyArray getEmptyArray() {
+    return findChildByClass(SophiaEmptyArray.class);
+  }
+
+  @Override
+  @Nullable
   public SophiaEmptyObject getEmptyObject() {
     return findChildByClass(SophiaEmptyObject.class);
   }
@@ -35,6 +41,12 @@ public class SophiaAssignmentExpressionImpl extends SophiaExpressionImpl impleme
   @NotNull
   public List<SophiaExpression> getExpressionList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, SophiaExpression.class);
+  }
+
+  @Override
+  @Nullable
+  public SophiaExpressionInObject getExpressionInObject() {
+    return findChildByClass(SophiaExpressionInObject.class);
   }
 
   @Override

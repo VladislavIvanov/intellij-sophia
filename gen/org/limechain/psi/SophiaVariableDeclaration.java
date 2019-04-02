@@ -11,6 +11,9 @@ public interface SophiaVariableDeclaration extends PsiElement {
   SophiaDeclarationList getDeclarationList();
 
   @Nullable
+  SophiaPropertyAccessExpression getPropertyAccessExpression();
+
+  @Nullable
   SophiaTypeName getTypeName();
 
   @Nullable

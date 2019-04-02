@@ -14,7 +14,7 @@ public class SophiaCodeStyleSettingsProvider extends CodeStyleSettingsProvider {
     @Nullable
     @Override
     public String getConfigurableDisplayName() {
-        return "Æ Sophia";
+        return "Sophia Æternity";
     }
 
 

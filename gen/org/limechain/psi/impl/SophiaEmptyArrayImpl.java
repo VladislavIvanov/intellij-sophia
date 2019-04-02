@@ -11,31 +11,19 @@ import static org.limechain.psi.SophiaTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import org.limechain.psi.*;
 
-public class SophiaSophiaTypeImpl extends ASTWrapperPsiElement implements SophiaSophiaType {
+public class SophiaEmptyArrayImpl extends ASTWrapperPsiElement implements SophiaEmptyArray {
 
-  public SophiaSophiaTypeImpl(@NotNull ASTNode node) {
+  public SophiaEmptyArrayImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull SophiaVisitor visitor) {
-    visitor.visitSophiaType(this);
+    visitor.visitEmptyArray(this);
   }
 
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof SophiaVisitor) accept((SophiaVisitor)visitor);
     else super.accept(visitor);
-  }
-
-  @Override
-  @NotNull
-  public List<SophiaSophiaType> getSophiaTypeList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, SophiaSophiaType.class);
-  }
-
-  @Override
-  @Nullable
-  public PsiElement getIdentifier() {
-    return findChildByType(IDENTIFIER);
   }
 
 }

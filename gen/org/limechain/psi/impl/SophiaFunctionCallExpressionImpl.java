@@ -38,6 +38,18 @@ public class SophiaFunctionCallExpressionImpl extends SophiaExpressionImpl imple
   }
 
   @Override
+  @NotNull
+  public List<SophiaSophiaType> getSophiaTypeList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, SophiaSophiaType.class);
+  }
+
+  @Override
+  @NotNull
+  public List<SophiaStatement> getStatementList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, SophiaStatement.class);
+  }
+
+  @Override
   @Nullable
   public SophiaTypeName getTypeName() {
     return findChildByClass(SophiaTypeName.class);

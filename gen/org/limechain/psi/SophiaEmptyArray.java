@@ -5,12 +5,6 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface SophiaParameterDef extends PsiElement {
-
-  @NotNull
-  List<SophiaSophiaType> getSophiaTypeList();
-
-  @NotNull
-  List<SophiaTypeName> getTypeNameList();
+public interface SophiaEmptyArray extends PsiElement {
 
 }

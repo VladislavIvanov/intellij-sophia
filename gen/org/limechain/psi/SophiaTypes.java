@@ -28,6 +28,7 @@ public interface SophiaTypes {
   IElementType ELEMENTARY_TYPE_NAME = new SophiaElementType("ELEMENTARY_TYPE_NAME");
   IElementType ELSE_STATEMENT = new SophiaElementType("ELSE_STATEMENT");
   IElementType EMIT_STATEMENT = new SophiaElementType("EMIT_STATEMENT");
+  IElementType EMPTY_ARRAY = new SophiaElementType("EMPTY_ARRAY");
   IElementType EMPTY_OBJECT = new SophiaElementType("EMPTY_OBJECT");
   IElementType ENUM_DEFINITION = new SophiaElementType("ENUM_DEFINITION");
   IElementType ENUM_VALUE = new SophiaElementType("ENUM_VALUE");
@@ -35,6 +36,7 @@ public interface SophiaTypes {
   IElementType EVENT_DEFINITION = new SophiaElementType("EVENT_DEFINITION");
   IElementType EXPONENT_EXPRESSION = new SophiaElementType("EXPONENT_EXPRESSION");
   IElementType EXPRESSION = new SophiaElementType("EXPRESSION");
+  IElementType EXPRESSION_IN_OBJECT = new SophiaElementType("EXPRESSION_IN_OBJECT");
   IElementType FOR_STATEMENT = new SophiaElementType("FOR_STATEMENT");
   IElementType FUNCTION_CALL_ARGUMENTS = new SophiaElementType("FUNCTION_CALL_ARGUMENTS");
   IElementType FUNCTION_CALL_EXPRESSION = new SophiaElementType("FUNCTION_CALL_EXPRESSION");
@@ -58,6 +60,7 @@ public interface SophiaTypes {
   IElementType NEW_EXPRESSION = new SophiaElementType("NEW_EXPRESSION");
   IElementType NUMBER_LITERAL = new SophiaElementType("NUMBER_LITERAL");
   IElementType OBJECT_EXPRESSION = new SophiaElementType("OBJECT_EXPRESSION");
+  IElementType OBJECT_VARIABLE_DECLARATION = new SophiaElementType("OBJECT_VARIABLE_DECLARATION");
   IElementType OR_EXPRESSION = new SophiaElementType("OR_EXPRESSION");
   IElementType OR_OP_EXPRESSION = new SophiaElementType("OR_OP_EXPRESSION");
   IElementType PARAMETER_DEF = new SophiaElementType("PARAMETER_DEF");
@@ -66,6 +69,7 @@ public interface SophiaTypes {
   IElementType PLACEHOLDER_STATEMENT = new SophiaElementType("PLACEHOLDER_STATEMENT");
   IElementType PLUS_MIN_EXPRESSION = new SophiaElementType("PLUS_MIN_EXPRESSION");
   IElementType PRIMARY_EXPRESSION = new SophiaElementType("PRIMARY_EXPRESSION");
+  IElementType PROPERTY_ACCESS_EXPRESSION = new SophiaElementType("PROPERTY_ACCESS_EXPRESSION");
   IElementType RECORD_DEFINITION = new SophiaElementType("RECORD_DEFINITION");
   IElementType SEQ_EXPRESSION = new SophiaElementType("SEQ_EXPRESSION");
   IElementType SHIFT_EXPRESSION = new SophiaElementType("SHIFT_EXPRESSION");
@@ -168,6 +172,8 @@ public interface SophiaTypes {
   IElementType NONE = new SophiaTokenType("None");
   IElementType NOT = new SophiaTokenType("!");
   IElementType OR = new SophiaTokenType("|");
+  IElementType ORACLE = new SophiaTokenType("oracle");
+  IElementType ORACLE_QUERY = new SophiaTokenType("oracle_query");
   IElementType OROR = new SophiaTokenType("||");
   IElementType OR_ASSIGN = new SophiaTokenType("|=");
   IElementType PERCENT = new SophiaTokenType("%");
@@ -269,6 +275,9 @@ public interface SophiaTypes {
       else if (type == EMIT_STATEMENT) {
         return new SophiaEmitStatementImpl(node);
       }
+      else if (type == EMPTY_ARRAY) {
+        return new SophiaEmptyArrayImpl(node);
+      }
       else if (type == EMPTY_OBJECT) {
         return new SophiaEmptyObjectImpl(node);
       }
@@ -286,6 +295,9 @@ public interface SophiaTypes {
       }
       else if (type == EXPONENT_EXPRESSION) {
         return new SophiaExponentExpressionImpl(node);
+      }
+      else if (type == EXPRESSION_IN_OBJECT) {
+        return new SophiaExpressionInObjectImpl(node);
       }
       else if (type == FOR_STATEMENT) {
         return new SophiaForStatementImpl(node);
@@ -356,6 +368,9 @@ public interface SophiaTypes {
       else if (type == OBJECT_EXPRESSION) {
         return new SophiaObjectExpressionImpl(node);
       }
+      else if (type == OBJECT_VARIABLE_DECLARATION) {
+        return new SophiaObjectVariableDeclarationImpl(node);
+      }
       else if (type == OR_EXPRESSION) {
         return new SophiaOrExpressionImpl(node);
       }
@@ -379,6 +394,9 @@ public interface SophiaTypes {
       }
       else if (type == PRIMARY_EXPRESSION) {
         return new SophiaPrimaryExpressionImpl(node);
+      }
+      else if (type == PROPERTY_ACCESS_EXPRESSION) {
+        return new SophiaPropertyAccessExpressionImpl(node);
       }
       else if (type == RECORD_DEFINITION) {
         return new SophiaRecordDefinitionImpl(node);

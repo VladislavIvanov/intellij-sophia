@@ -27,7 +27,7 @@
     booleanLiteral='regexp:true|false'
     space='regexp:\s+'
 
-    Identifier='regexp:[a-zA-Z\._$][a-zA-Z_$0-9\.]*'
+    Identifier="regexp:[a-zA-Z_$0-9\.\']*"
 
     DOT='.'
     COLON=':'
@@ -110,14 +110,14 @@ private VisibilityModifiers ::= ( public | internal | private )
 StateVariableDeclaration ::= TypeName (VisibilityModifiers constant | constant? VisibilityModifiers? ) Identifier ('=' (Expression | SophiaType))?
 
 RecordDefinition ::= record (Identifier | state) '=' '{'
-                     ( Identifier ':' (ElementaryTypeName | SophiaType)) ( ',' Identifier ':' (ElementaryTypeName | SophiaType))* '}'
+                     ( Identifier ':' (ElementaryTypeName | SophiaType | Identifier )) ( ',' Identifier ':' (ElementaryTypeName | SophiaType | Identifier))* '}'
 
-InitFunctionDefinition ::= VisibilityModifiers function init ParameterList ( ':' state )? '=' '{' (AssignmentExpression ',' | AssignmentExpression)* '}'
+InitFunctionDefinition ::= VisibilityModifiers FunctionModifier? function init ParameterList ( ':' state )? '=' (ObjectVariableDeclaration | VariableDeclaration)? '{' (AssignmentExpression ',' | AssignmentExpression)* '}'
 
 FunctionModifier ::=  stateful | public | private | internal | StateMutability | Identifier
 
 FunctionDefinition ::= ( FunctionModifier )* function Identifier? ParameterList
-                     ( ':' SophiaType )? '=' '{'? Block '}'?
+                     ( ':' (SophiaType | Identifier) )? '=' '{'? Block '}'?
 
 EventDefinition ::= event Identifier anonymous?
 
@@ -125,7 +125,7 @@ EnumValue ::= Identifier
 
 EnumDefinition ::= enum Identifier '{' EnumValue? (',' EnumValue)* '}'
 
-ParameterDef ::= Identifier (':' (TypeName | SophiaType | Identifier))?
+ParameterDef ::= ( SophiaType | TypeName | Identifier) (':' (TypeName | SophiaType | Identifier))?
 ParameterList ::= '(' ( ParameterDef (',' ParameterDef)* )? ')'
 
 DeclarationItem ::= Identifier ','? | ','
@@ -133,11 +133,14 @@ DeclarationList ::= '(' DeclarationItem*  ')'
 TypedDeclarationItem ::= (TypeName StorageLocation?)? Identifier ','? | ','
 TypedDeclarationList ::= '(' TypedDeclarationItem*  ')'
 
+ObjectVariableDeclaration ::= let Identifier '=' '{' (AssignmentExpression ',' | AssignmentExpression)* '}'
+
 VariableDeclaration ::=
     let DeclarationList |
     DeclarationList |
     TypedDeclarationList |
-    TypeName Identifier
+    TypeName Identifier |
+    PropertyAccessExpression
 
 TypeName ::= ElementaryTypeName
          | MappingTypeName
@@ -181,7 +184,7 @@ BreakSt ::= break
 ThrowSt ::= abort
 EmitStatement ::= emit FunctionCallExpression
 SeqExpression ::= '(' ','? Expression (',' Expression)* ','? ')'
-VariableDefinition ::= VariableDeclaration ( '=' (Expression | Statement | hash) )?
+VariableDefinition ::= VariableDeclaration ( '=' (Expression | Statement | hash | ExpressionInObject) )?
 MapIteration ::= ("Map.member" ParameterList )
 
 Expression ::=
@@ -213,15 +216,15 @@ Expression ::=
   | AliasExpression
 
 
-AssignmentExpression ::= Expression ('=' | '|=' | '^=' | '&=' | '<<=' | '>>=' | '+=' | '-=' | '*=' | '/=' | '%=') (Expression | SophiaType | EmptyObject)
-TypedAssignmentExpression ::= ':' (ElementaryTypeName | SophiaType)+
-InlineArrayExpression ::= '[' Expression (',' Expression)* ']'
+AssignmentExpression ::= Expression ('=' | '|=' | '^=' | '&=' | '<<=' | '>>=' | '+=' | '-=' | '*=' | '/=' | '%=' ) (EmptyArray | Expression | SophiaType | ExpressionInObject | EmptyObject)
+TypedAssignmentExpression ::= ':' (ElementaryTypeName | SophiaType | Identifier)+
+InlineArrayExpression ::= '[' Expression? (',' Expression)* ']'
 TernaryExpression ::= Expression '?' RightTernaryExpression
 private RightTernaryExpression ::= Expression ':' Expression
 OrExpression ::= Expression '||' Expression
 AndExpression ::= Expression '&&' Expression
 EqExpression ::= Expression ('==' | '!=') Expression
-CompExpression ::= Expression ('<' | '>' | '<=' | '>=') Expression
+CompExpression ::= Expression ('<' | '>' | '<=' | '>=' | '=<') Expression
 OrOpExpression ::= Expression '|' Expression
 XorOpExpression ::= Expression '^' Expression
 AndOpExpression ::= Expression '&' Expression
@@ -234,7 +237,11 @@ IncrementExpression ::= Expression ('++' | '--')
 ParenExpression ::= '(' Expression ')'
 ArrowExpression ::= Expression '=>' Expression?
 AliasExpression ::= Expression '@' Expression
+ExpressionInObject ::= '{' (Identifier | Expression) '=' (Expression | Identifier ) (',' (Identifier | Expression ) '=' ( Expression | Identifier ))* '}'
+PropertyAccessExpression ::= '{' Expression '}'
 EmptyObject ::= '{''}'
+EmptyArray ::= '['']'
+
 
 PrimaryExpression ::= VarLiteral
                   | BooleanLiteral
@@ -244,8 +251,8 @@ PrimaryExpression ::= VarLiteral
                   | ElementaryTypeNameExpression
 
 VarLiteral ::= Identifier
-FunctionCallExpression ::= (Identifier '(' FunctionCallArguments? ')') |
-                           ( ( PrimaryExpression | NewExpression | TypeName  ) ( ( '.' Identifier ) | ( '[' Expression? ']' ) )* '(' FunctionCallArguments? ')' )
+FunctionCallExpression ::= (Identifier (':' (Identifier | SophiaType))* (',' (Identifier (':' (Identifier | SophiaType))*)* ')'* '=>'* Statement* '(' FunctionCallArguments? ')') |
+                           ( ( PrimaryExpression | NewExpression | TypeName  ) ( ( '.' Identifier ) | ( '[' Expression? ']' ) )* '(' FunctionCallArguments? ')' ))
 
 CallExpression ::= Expression ( ( '.' Identifier ) | ( '[' Expression ']' ) )* '(' FunctionCallArguments? ')' ('(' FunctionCallArguments? ')')*
 FunctionCallArguments ::= StateUpdateExpression | ObjectExpression | Expression? ( ',' Expression )*
@@ -257,7 +264,7 @@ StateUpdateExpression ::= state '{' (IndexAccessExpression | ObjectExpressionCla
 NewExpression ::= new ( Identifier | PrimitiveLiteral )
 
 MemberAccessExpression ::= Expression '.' Identifier
-IndexAccessExpression ::= Expression '[' Expression? ']'
+IndexAccessExpression ::= Expression '[' Expression?  ']'
 
 BooleanLiteral ::= booleanLiteral
 NumberLiteral ::= ( HexNumber | DecimalNumber | FixedNumber | ScientificNumber)
@@ -274,6 +281,6 @@ private ElementaryTypeNameExpression ::= ElementaryTypeName
 
 ElementaryTypeName ::= address | bool | string | var | let | type | None | Some | MapType
 
-SophiaType ::= int | address | bool | bits | string | list | tuple | record | map | state | transactions | events | signature
+SophiaType ::= int | address | bool | bits | string | list'(' Identifier ')' | list  | tuple | record | map | state | transactions | events | signature | oracle '(' (SophiaType | Identifier) (',' (SophiaType | Identifier) )* ')' | oracle |  oracle_query '(' (SophiaType | Identifier) (',' (SophiaType | Identifier) )* ')' | '(' SophiaType (',' SophiaType)* ')'
 
-MapType ::= map '(' (ElementaryTypeName | SophiaType) (',' (ElementaryTypeName | SophiaType))? ')'
+MapType ::= map '(' (ElementaryTypeName | SophiaType | Identifier) (',' (ElementaryTypeName | SophiaType | Identifier))? ')'

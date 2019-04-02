@@ -87,6 +87,10 @@ public class SophiaVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
+  public void visitEmptyArray(@NotNull SophiaEmptyArray o) {
+    visitPsiElement(o);
+  }
+
   public void visitEmptyObject(@NotNull SophiaEmptyObject o) {
     visitPsiElement(o);
   }
@@ -112,6 +116,10 @@ public class SophiaVisitor extends PsiElementVisitor {
   }
 
   public void visitExpression(@NotNull SophiaExpression o) {
+    visitPsiElement(o);
+  }
+
+  public void visitExpressionInObject(@NotNull SophiaExpressionInObject o) {
     visitPsiElement(o);
   }
 
@@ -207,6 +215,10 @@ public class SophiaVisitor extends PsiElementVisitor {
     visitExpression(o);
   }
 
+  public void visitObjectVariableDeclaration(@NotNull SophiaObjectVariableDeclaration o) {
+    visitPsiElement(o);
+  }
+
   public void visitOrExpression(@NotNull SophiaOrExpression o) {
     visitExpression(o);
   }
@@ -236,6 +248,10 @@ public class SophiaVisitor extends PsiElementVisitor {
   }
 
   public void visitPrimaryExpression(@NotNull SophiaPrimaryExpression o) {
+    visitExpression(o);
+  }
+
+  public void visitPropertyAccessExpression(@NotNull SophiaPropertyAccessExpression o) {
     visitExpression(o);
   }
 

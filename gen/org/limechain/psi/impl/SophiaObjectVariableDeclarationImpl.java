@@ -11,14 +11,14 @@ import static org.limechain.psi.SophiaTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import org.limechain.psi.*;
 
-public class SophiaSophiaTypeImpl extends ASTWrapperPsiElement implements SophiaSophiaType {
+public class SophiaObjectVariableDeclarationImpl extends ASTWrapperPsiElement implements SophiaObjectVariableDeclaration {
 
-  public SophiaSophiaTypeImpl(@NotNull ASTNode node) {
+  public SophiaObjectVariableDeclarationImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull SophiaVisitor visitor) {
-    visitor.visitSophiaType(this);
+    visitor.visitObjectVariableDeclaration(this);
   }
 
   public void accept(@NotNull PsiElementVisitor visitor) {
@@ -28,14 +28,14 @@ public class SophiaSophiaTypeImpl extends ASTWrapperPsiElement implements Sophia
 
   @Override
   @NotNull
-  public List<SophiaSophiaType> getSophiaTypeList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, SophiaSophiaType.class);
+  public List<SophiaExpression> getExpressionList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, SophiaExpression.class);
   }
 
   @Override
-  @Nullable
+  @NotNull
   public PsiElement getIdentifier() {
-    return findChildByType(IDENTIFIER);
+    return findNotNullChildByType(IDENTIFIER);
   }
 
 }

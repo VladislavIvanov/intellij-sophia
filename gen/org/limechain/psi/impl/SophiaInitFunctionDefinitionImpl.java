@@ -33,9 +33,27 @@ public class SophiaInitFunctionDefinitionImpl extends ASTWrapperPsiElement imple
   }
 
   @Override
+  @Nullable
+  public SophiaFunctionModifier getFunctionModifier() {
+    return findChildByClass(SophiaFunctionModifier.class);
+  }
+
+  @Override
+  @Nullable
+  public SophiaObjectVariableDeclaration getObjectVariableDeclaration() {
+    return findChildByClass(SophiaObjectVariableDeclaration.class);
+  }
+
+  @Override
   @NotNull
   public SophiaParameterList getParameterList() {
     return findNotNullChildByClass(SophiaParameterList.class);
+  }
+
+  @Override
+  @Nullable
+  public SophiaVariableDeclaration getVariableDeclaration() {
+    return findChildByClass(SophiaVariableDeclaration.class);
   }
 
 }

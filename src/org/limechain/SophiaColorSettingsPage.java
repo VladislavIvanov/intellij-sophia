@@ -119,6 +119,6 @@ public class SophiaColorSettingsPage implements ColorSettingsPage {
     @NotNull
     @Override
     public String getDisplayName() {
-        return "Æ Sophia";
+        return "Sophia Æternity";
     }
 }
