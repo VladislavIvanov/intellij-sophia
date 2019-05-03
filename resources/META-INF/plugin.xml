@@ -1,8 +1,8 @@
 <idea-plugin>
     <id>org.limechain</id>
     <name>Sophia Æternity</name>
-    <version>1.0</version>
-    <vendor email="vlad@limechain.tech" url="http://www.limechain.tech">LimeChain</vendor>
+    <version>1.2</version>
+    <vendor email="dev-suite@aeternity.com" url="https://aeternity.com/">aeternity</vendor>
 
     <description><![CDATA[
         Æternity Sophia language extension. <br/>
@@ -11,7 +11,16 @@
     ]]></description>
 
     <change-notes><![CDATA[
-        <p> Sophia Æ extension v1 </p>
+        <p> Sophia Æ extension v1.2 </p>
+        <ul>
+            <li>Updated plugin metadata file</li>
+        </ul>
+        <p> Sophia Æ extension v1.1 </p>
+        <ul>
+            <li>Updated Sophia language grammar</li>
+        </ul>
+
+        <p> Sophia Æ extension v1.0 </p>
         <ul>
             <li>Define a Sophia language</li>
             <li>Define an Aeternity icon</li>
